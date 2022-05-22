@@ -86,6 +86,7 @@ int main()
 	// Create the shader programs
 	Shader mainShader("main.vsh", "main.fsh");
 	Shader lightShader("light.vsh", "light.fsh");
+	Shader shadowShader("shadow.vsh", "shadow.fsh");
 
 	// Get the model(s)
 	Model Earth("Models/Earth/scene.gltf");
@@ -168,6 +169,17 @@ int main()
 		// Uniform that passes eyePosition needed for specular lighting
 		GLint eyePosUniformLocation = glGetUniformLocation(mainShader.program, "eyePos");
 		glUniform3f(eyePosUniformLocation, 0.0f, 1.0f, 5.5f);
+
+		GLint ambientUniformLocation = glGetUniformLocation(mainShader.program, "pointLight.ambient");
+		glUniform3f(ambientUniformLocation, 0.1f, 0.1f, 0.1f);
+		GLint pointLightDiffuseUniformLocation = glGetUniformLocation(mainShader.program, "pointLight.diffuse");
+		glUniform3f(pointLightDiffuseUniformLocation, 1.0f, 1.0f, 1.0f);
+		GLint pointLightSpecularUniformLocation = glGetUniformLocation(mainShader.program, "pointLight.specular");
+		glUniform3f(pointLightSpecularUniformLocation, 0.5f, 0.5f, 0.5f);
+
+		GLint pointLightPosUniformLocation = glGetUniformLocation(mainShader.program, "pointLight.position");
+		glUniform3f(pointLightPosUniformLocation, 0.0f, 0.0f, 0.0f);
+
 
 		// Tell GLFW to swap the screen buffer with the offscreen buffer
 		glfwSwapBuffers(window);

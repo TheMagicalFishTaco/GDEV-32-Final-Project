@@ -13,33 +13,40 @@ in vec3 FragPos;
 
 in vec3 fragNormal;
 
-// Texture unit of the texture
-uniform sampler2D texture_diffuse1;
+struct PointLight
+{
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+	vec3 position;
+};
 
-uniform vec3 lightColor, lightPos, eyePos;
+// Texture unit of the texture
+uniform sampler2D texture_diffuse1, texture_specular1;
+uniform PointLight pointLight;
+uniform vec3 eyePos;
 
 void main()
 {
 	//ambient
-	float ambientStrength = 0.1f;
-	vec3 ambient = ambientStrength * lightColor;
+	vec3 ambient = pointLight.ambient * texture(texture_diffuse1, outUV).rgb;
 	
 	//diffuse
 	vec3 norm = normalize(fragNormal);
-	vec3 lightDir = normalize(lightPos - FragPos);
+	vec3 lightDir = normalize(pointLight.position - FragPos);
+	float pointDist = length(pointLight.position - FragPos);
 	float diff = max(dot(norm, lightDir), 0.0f);
-	vec3 diffuse = diff * lightColor;
+	vec3 pointDiffuse = diff * pointLight.diffuse * texture(texture_diffuse1, outUV).rgb;
 	
 	// specular
-    float specularStrength = 0.5;
     vec3 viewDir = normalize(eyePos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);  
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-    vec3 specular = specularStrength * spec * lightColor;  
+	vec3 pointSpecular = spec * pointLight.specular * texture(texture_specular1,outUV).rgb * texture(texture_diffuse1, outUV).rgb;
 	
-	vec3 finalColor = (ambient + diffuse + specular);
+	vec3 finalColor = ambient + (pointDiffuse + pointSpecular);
 	
 	// Get pixel color of the texture at the current UV coordinate
 	// and output it as our final fragment color
-	fragColor = texture(texture_diffuse1, outUV) * vec4(finalColor,1.0);
+	fragColor = vec4(finalColor,1.0);
 }
