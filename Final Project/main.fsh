@@ -24,31 +24,56 @@ struct PointLight
 };
 
 // Texture unit of the texture
-uniform sampler2D texture_diffuse1, texture_specular1, shadowMap;
+uniform sampler2D texture_diffuse1, texture_specular1;
 uniform PointLight pointLight;
 uniform vec3 eyePos;
+uniform samplerCube shadowMap;
+uniform float farPlane;
+
+vec3 gridSamplingDisk[20] = vec3[]
+(
+   vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
+   vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+   vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
+   vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
+   vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
+);
+
+
+float calculateShadow(vec3 normalVector, vec3 towardsLight)
+{
+	vec3 fragToLight = fragPos - lightPos;
+
+	float depthValue = texture(shadowMap, fragToLight).r;
+	float depthLightSpace = length(fragToLight);
+	float bias = max(0.05f * (1.0f - dot(normalVector, towardsLight)), 0.005f);
+
+	float newDepthValue = 0.0f;
+	float shadowValue = 0.0f;
+	vec2 shadowMapPixelSize = 1.0f / vec2(1024, 1024);
+	float viewDistance = length(viewPos - fragPos);
+    float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
+	for (int x = 0; x < gridSamplingDisk.size(); x++)
+	{
+		newDepthValue = texture(shadowMap, fragToLight + gridSamplingDisk[x] * diskRadius).r;
+		newDepthValue *= far_plane; 
+		if (newDepthValue < depthLightSpace - bias)
+		{
+			shadowValue += 0.0f;
+		}
+		else
+		{
+			shadowValue += 1.0f;
+		}
+	}
+
+	return shadowValue;
+}
 
 void main()
 {
 	//ambient
 	vec3 ambient = pointLight.ambient * texture(texture_diffuse1, outUV).rgb;
-	
-	vec3 fragLightNDC = vec3(lightFragPosition.x / lightFragPosition.w, lightFragPosition.y / lightFragPosition.w, lightFragPosition.z / lightFragPosition.w);
-	
-	fragLightNDC.x = (fragLightNDC.x + 1) / 2;
-	fragLightNDC.y = (fragLightNDC.y + 1) / 2;
-	fragLightNDC.z = (fragLightNDC.z + 1) / 2;
-
-	float sampledDepth = texture(shadowMap, fragLightNDC.xy).r;
-
-	if (sampledDepth < fragLightNDC.z)
-	{
-
-	}
-	else
-	{
-		
-	}
 
 	//diffuse
 	vec3 norm = normalize(fragNormal);
@@ -63,9 +88,9 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
 	vec3 pointSpecular = spec * pointLight.specular * texture(texture_specular1,outUV).rgb * texture(texture_diffuse1, outUV).rgb;
 	
-	vec3 PointComponent = (pointDiffuse + pointSpecular);
+	vec3 PointComponent = (pointDiffuse + pointSpecular) * calculateShadow(norm, lightDir));
 	
 	// Get pixel color of the texture at the current UV coordinate
 	// and output it as our final fragment color
-	fragColor = vec4(finalColor,1.0);
+	fragColor = vec4(ambient + PointComponent, 1.0);
 }

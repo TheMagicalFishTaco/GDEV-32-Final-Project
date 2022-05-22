@@ -24,10 +24,9 @@ out vec3 fragNormal;
 //
 out vec3 FragPos;
 
-out vec4 lightFragPosition;
 
 //mvp matrix
-uniform mat4 mvpMatrix, modelMatrix, lightProjMatrix, lightViewMatrix;
+uniform mat4 mvpMatrix, modelMatrix;
 
 
 void main()
@@ -35,8 +34,6 @@ void main()
 	// Convert our vertex position to homogeneous coordinates by introducing the w-component.
 	// Vertex positions are ... positions, so we specify the w-coordinate as 1.0.
 	vec4 finalPosition = vec4(vertexPosition, 1.0);
-	
-	lightFragPosition = lightProjMatrix * lightViewMatrix * modelMatrix * finalPosition; 
 
 	FragPos = vec3(modelMatrix * finalPosition);
     fragNormal = mat3(transpose(inverse(modelMatrix))) * vertexNormal;  

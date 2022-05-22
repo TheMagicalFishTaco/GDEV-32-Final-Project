@@ -86,7 +86,7 @@ int main()
 	// Create the shader programs
 	Shader mainShader("main.vsh", "main.fsh");
 	Shader lightShader("light.vsh", "light.fsh");
-	Shader shadowShader("shadow.vsh", "shadow.fsh");
+	Shader shadowShader("shadow.vsh", "shadow.fsh", "shadow.gsh");
 
 	// Get the model(s)
 	Model Earth("Models/Earth/scene.gltf");
@@ -101,7 +101,7 @@ int main()
 
 	GLuint fbo;
 	glGenFramebuffers(1, &fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
 
 	//Binding texture to FBO
 	GLuint fboTex;
@@ -113,12 +113,13 @@ int main()
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT,
 			shadowWidth, shadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowWidth, shadowHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, fboTex, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
@@ -135,6 +136,47 @@ int main()
 	{
 		// Clear the color and depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		float aspect = (float)shadowWidth / (float)shadowHeight;
+		float near = 1.0f;
+		float far = 25.0f;
+		glm::vec3 lightPos = glm::vec3(0.0f);
+
+		glm::mat4 projectionMatrixLight = glm::perspective(glm::radians(90.0f), aspect, near, far);
+		std::vector<glm::mat4> viewMatrixLight;
+		viewMatrixLight.push_back(projectionMatrixLight *
+			glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+		viewMatrixLight.push_back(projectionMatrixLight *
+			glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+		viewMatrixLight.push_back(projectionMatrixLight *
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+		viewMatrixLight.push_back(projectionMatrixLight *
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
+		viewMatrixLight.push_back(projectionMatrixLight *
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
+		viewMatrixLight.push_back(projectionMatrixLight *
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
+
+		//FIRST PASS
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glViewport(0, 0, 1024, 1024);
+		shadowShader.use();
+		
+		for (unsigned int i = 0; i < 6; ++i)
+		{
+			//simpleDepthShader.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
+			std::string shadowMatrixName = "shadowMatrices[" + std::to_string(i) + "]";
+			GLint shadowMatrixUniformLocation = glGetUniformLocation(shadowShader.program, shadowMatrixName.c_str());
+			glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(viewMatrixLight[i]));
+		}
+
+		GLint farPlaneUniformLocation = glGetUniformLocation(mainShader.program, "farPlane");
+		glUniform1f(farPlaneUniformLocation, far);
+		GLint lightPosUniformLocation = glGetUniformLocation(mainShader.program, "lightPos");
+		glUniform3f(lightPosUniformLocation, 0.0f, 0.0f, 0.0f);
+		GLint eyePosUniformLocation = glGetUniformLocation(mainShader.program, "eyePos");
+		glUniform3f(eyePosUniformLocation, 0.0f, 1.0f, 5.5f);
 
 		//---View Matrix---
 		glm::mat4 viewMatrix;
@@ -200,6 +242,8 @@ int main()
 		// Uniform that passes eyePosition needed for specular lighting
 		GLint eyePosUniformLocation = glGetUniformLocation(mainShader.program, "eyePos");
 		glUniform3f(eyePosUniformLocation, 0.0f, 1.0f, 5.5f);
+		GLint farPlaneUniformLocation = glGetUniformLocation(mainShader.program, "farPlane");
+		glUniform1f(farPlaneUniformLocation, far);
 
 		GLint ambientUniformLocation = glGetUniformLocation(mainShader.program, "pointLight.ambient");
 		glUniform3f(ambientUniformLocation, 0.1f, 0.1f, 0.1f);
