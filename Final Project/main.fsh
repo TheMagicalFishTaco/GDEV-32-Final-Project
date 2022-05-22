@@ -13,6 +13,8 @@ in vec3 FragPos;
 
 in vec3 fragNormal;
 
+in vec4 lightFragPosition;
+
 struct PointLight
 {
 	vec3 ambient;
@@ -22,7 +24,7 @@ struct PointLight
 };
 
 // Texture unit of the texture
-uniform sampler2D texture_diffuse1, texture_specular1;
+uniform sampler2D texture_diffuse1, texture_specular1, shadowMap;
 uniform PointLight pointLight;
 uniform vec3 eyePos;
 
@@ -31,6 +33,23 @@ void main()
 	//ambient
 	vec3 ambient = pointLight.ambient * texture(texture_diffuse1, outUV).rgb;
 	
+	vec3 fragLightNDC = vec3(lightFragPosition.x / lightFragPosition.w, lightFragPosition.y / lightFragPosition.w, lightFragPosition.z / lightFragPosition.w);
+	
+	fragLightNDC.x = (fragLightNDC.x + 1) / 2;
+	fragLightNDC.y = (fragLightNDC.y + 1) / 2;
+	fragLightNDC.z = (fragLightNDC.z + 1) / 2;
+
+	float sampledDepth = texture(shadowMap, fragLightNDC.xy).r;
+
+	if (sampledDepth < fragLightNDC.z)
+	{
+
+	}
+	else
+	{
+		
+	}
+
 	//diffuse
 	vec3 norm = normalize(fragNormal);
 	vec3 lightDir = normalize(pointLight.position - FragPos);
@@ -44,7 +63,7 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
 	vec3 pointSpecular = spec * pointLight.specular * texture(texture_specular1,outUV).rgb * texture(texture_diffuse1, outUV).rgb;
 	
-	vec3 finalColor = ambient + (pointDiffuse + pointSpecular);
+	vec3 PointComponent = (pointDiffuse + pointSpecular);
 	
 	// Get pixel color of the texture at the current UV coordinate
 	// and output it as our final fragment color
