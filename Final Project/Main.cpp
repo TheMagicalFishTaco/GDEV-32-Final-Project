@@ -34,6 +34,24 @@
 /// <param name="width">New width</param>
 /// <param name="height">New height</param>
 void FramebufferSizeChangedCallback(GLFWwindow* window, int width, int height);
+void mouse_input(GLFWwindow *window, double xPos, double yPos);
+void scroll_zoom(GLFWwindow* window, double xOffset, double yOffset);
+void processInput(GLFWwindow *window);
+
+// camera variables
+glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 5.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+float deltaTime = 0.0f;
+float lastframe = 0.0f;
+
+// mouse input variables
+bool firstMouse = true;
+float yaw = -90.0f;
+float pitch = 0.0f;
+float lastX = 800.0f / 2.0;
+float lastY = 600.0f / 2.0;
+float fov = 45.0f;
 
 /// <summary>
 /// Main function.
@@ -70,6 +88,15 @@ int main()
 		return 1;
 	}
 
+	// hide the cursor
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	// call the mouse input method whenever the cursor is moved on the window
+	glfwSetCursorPosCallback(window, mouse_input);
+
+	//call the scroll zoom method whenever the user scrolls
+	glfwSetScrollCallback(window, scroll_zoom);
+
 	// Tell GLFW to use the OpenGL context that was assigned to the window that we just created
 	glfwMakeContextCurrent(window);
 
@@ -91,6 +118,7 @@ int main()
 	// Get the model(s)
 	Model Earth("Models/Earth/scene.gltf");
 	Model Sun("Models/Sun/scene.gltf");
+	Model Wall("Models/Wall/scene.gltf");
 
 	// Tell OpenGL the dimensions of the region where stuff will be drawn.
 	// For now, tell OpenGL to use the whole screen
@@ -106,18 +134,23 @@ int main()
 	//Binding texture to FBO
 	GLuint fboTex;
 	glGenTextures(1, &fboTex);
-	glBindTexture(GL_TEXTURE_2D, fboTex);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, fboTex);
 
 	GLuint shadowWidth = 1024, shadowHeight = 1024;
 	for (unsigned int i = 0; i < 6; ++i)
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT,
 			shadowWidth, shadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	// glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	// glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, fboTex, 0);
@@ -134,36 +167,42 @@ int main()
 	// Render loop
 	while (!glfwWindowShouldClose(window))
 	{
+		float currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastframe;
+		lastframe = currentFrame;
+
+		processInput(window);
+
 		// Clear the color and depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		float aspect = (float)shadowWidth / (float)shadowHeight;
 		float near = 1.0f;
-		float far = 25.0f;
+		float far = 50.0f;
 		glm::vec3 lightPos = glm::vec3(0.0f);
 
 		glm::mat4 projectionMatrixLight = glm::perspective(glm::radians(90.0f), aspect, near, far);
 		std::vector<glm::mat4> viewMatrixLight;
 		viewMatrixLight.push_back(projectionMatrixLight *
-			glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 		viewMatrixLight.push_back(projectionMatrixLight *
-			glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 		viewMatrixLight.push_back(projectionMatrixLight *
-			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
 		viewMatrixLight.push_back(projectionMatrixLight *
-			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
 		viewMatrixLight.push_back(projectionMatrixLight *
-			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 		viewMatrixLight.push_back(projectionMatrixLight *
-			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 
 		//FIRST PASS
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, 1024, 1024);
+		glViewport(0, 0, shadowWidth, shadowHeight);
 		shadowShader.use();
 		
-		for (int i = 0; i < 6; i++)
+		for (int i = 0; i < 6; ++i)
 		{
 			std::string shadowMatrixName = "shadowMatrices[" + std::to_string(i) + "]";
 			const char* bruh = shadowMatrixName.c_str();
@@ -182,7 +221,7 @@ int main()
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
-		Sun.Draw(shadowShader);
+		// Sun.Draw(shadowShader);
 		modelMatrix = glm::mat4(1.0f);
 
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(50 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -195,30 +234,31 @@ int main()
 		Earth.Draw(shadowShader);
 
 		modelMatrix = glm::mat4(1.0f);
-
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 5.0f));	
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.05f, 0.001f));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(-10.0f, 0.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -5.0f));
 		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 		
-		Sun.Draw(shadowShader);
+		Wall.Draw(shadowShader);
 		
 
 		//SECOND PASS
-		glViewport(0, 0, windowWidth, windowHeight);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, windowWidth, windowHeight);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, fboTex);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, fboTex);
 
 		//---View Matrix---
 		glm::mat4 viewMatrix;
 
-		viewMatrix = glm::lookAt(glm::vec3(0.0f, 1.0f, 5.5f),
-								glm::vec3(0.0f, 0.0f, 0.0f),
-								glm::vec3(0.0f, 1.0f, 0.0f));
+		// viewMatrix = glm::lookAt(glm::vec3(0.0f, 1.0f, 5.5f),
+		// 						glm::vec3(0.0f, 0.0f, 0.0f),
+		// 						glm::vec3(0.0f, 1.0f, 0.0f));
+		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
 		//---Perspective Matrix---
-		glm::mat4 perspectiveMatrix = glm::perspective(45.0f, (GLfloat)windowWidth / (GLfloat)windowHeight, 1.0f, 150.0f);
+		glm::mat4 perspectiveMatrix = glm::perspective(45.0f, (GLfloat)windowWidth / (GLfloat)windowHeight, 0.1f, 150.0f);
 
 		// Shader Program for the Sun
 		lightShader.use();
@@ -264,21 +304,21 @@ int main()
 		Earth.Draw(mainShader);
 
 		modelMatrix = glm::mat4(1.0f);
-
-		modelMatrix = glm::mat4(1.0f);
-
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 5.0f));	
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.05f, 0.001f));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(-10.0f, 0.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -5.0f));
 		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-
+		
 		mvpMatrix = perspectiveMatrix * viewMatrix * modelMatrix;
 		glUniformMatrix4fv(mvpMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
-		
-		Sun.Draw(mainShader);
+
+		Wall.Draw(mainShader);
 
 		// Lighting
 		GLint eyePosUniformLocation = glGetUniformLocation(mainShader.program, "eyePos");
-		glUniform3f(eyePosUniformLocation, 0.0f, 1.0f, 5.5f);
+		// glUniform3f(eyePosUniformLocation, 0.0f, 1.0f, 5.5f);
+		glUniform3f(eyePosUniformLocation, cameraPos.x,  cameraPos.y,  cameraPos.z);
 		farPlaneUniformLocation = glGetUniformLocation(mainShader.program, "farPlane");
 		glUniform1f(farPlaneUniformLocation, far);
 
@@ -309,6 +349,90 @@ int main()
 	glfwTerminate();
 
 	return 0;
+}
+
+// Mouse Input
+void mouse_input(GLFWwindow *window, double xpos, double ypos)
+{
+	// if it is the first time you receive mouse input, update the last x and y variables with the current cursor location
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	// calculate the offset between the last and current frame
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	// apply mouse sensitivity so it isn't too jittery
+	float sensitivity = 0.1f;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	// add to the global yaw and pitch variables
+	yaw += xoffset;
+	pitch += yoffset;
+
+	// constrains the pitch so you can't look straight up or down
+	if (pitch > 89.0f)
+	{
+		pitch = 89.0f;
+	}
+
+	if (pitch < -89.0f)
+	{
+		pitch = -89.0f;
+	}
+
+	// calculate the direction vectors and update the cameraFront variable accordingly
+	glm::vec3 direction;
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(pitch));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	cameraFront = glm::normalize(direction);
+}
+
+void scroll_zoom(GLFWwindow* window, double xOffset, double yOffset)
+{
+	fov -= (float) yOffset;
+	if (fov < 1.0f)
+	{
+		fov = 1.0f;
+	}
+	if (fov > 45.0f)
+	{
+		fov = 45.0f;
+	}
+
+}
+// Keyboard input
+void processInput(GLFWwindow *window)
+{
+	float cameraSpeed = 2.5f * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	{
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	}
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		cameraPos += cameraSpeed * cameraFront;
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		cameraPos -= cameraSpeed * cameraFront;
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	}
 }
 
 /// <summary>
