@@ -177,6 +177,29 @@ int main()
 		glUniform3f(lightPosUniformLocation, 0.0f, 0.0f, 0.0f);
 		GLint eyePosUniformLocation = glGetUniformLocation(mainShader.program, "eyePos");
 		glUniform3f(eyePosUniformLocation, 0.0f, 1.0f, 5.5f);
+		GLint modelMatrixUniformLocation = glGetUniformLocation(shadowShader.program, "modelMatrix");
+
+		glm::mat4 modelMatrix = glm::mat4(1.0f);
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.15f, 0.15f, 0.15f));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+		Sun.Draw(shadowShader);
+		modelMatrix = glm::mat4(1.0f);
+
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(50*glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 3.0f));	
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(-113.4f), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(25 * glfwGetTime())), glm::vec3(0.0f, 0.0f, 1.0f));
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
+		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+		
+		Earth.Draw(shadowShader);
+
+		//SECOND PASS
+		glViewport(0, 0, windowWidth, windowHeight);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		//---View Matrix---
 		glm::mat4 viewMatrix;
@@ -211,7 +234,7 @@ int main()
 
 		//---Transformation Matrix for the Model (Earth)---
 
-		glm::mat4 modelMatrix = glm::mat4(1.0f);
+		modelMatrix = glm::mat4(1.0f);
 
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(50*glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 3.0f));	
@@ -219,7 +242,7 @@ int main()
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(25 * glfwGetTime())), glm::vec3(0.0f, 0.0f, 1.0f));
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
 
-		GLint modelMatrixUniformLocation = glGetUniformLocation(mainShader.program, "modelMatrix");
+		modelMatrixUniformLocation = glGetUniformLocation(mainShader.program, "modelMatrix");
 		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
 		glm::mat4 mvpMatrix;
@@ -236,13 +259,13 @@ int main()
 		glUniform3f(lightColorUniformLocation, 1.0f, 1.0f, 1.0f);
 
 		// Uniform that passes lightPos needed for diffuse lighting
-		GLint lightPosUniformLocation = glGetUniformLocation(mainShader.program, "lightPos");
+		lightPosUniformLocation = glGetUniformLocation(mainShader.program, "lightPos");
 		glUniform3f(lightPosUniformLocation, 0.0f, 0.0f, 0.0f);
 
 		// Uniform that passes eyePosition needed for specular lighting
-		GLint eyePosUniformLocation = glGetUniformLocation(mainShader.program, "eyePos");
+		eyePosUniformLocation = glGetUniformLocation(mainShader.program, "eyePos");
 		glUniform3f(eyePosUniformLocation, 0.0f, 1.0f, 5.5f);
-		GLint farPlaneUniformLocation = glGetUniformLocation(mainShader.program, "farPlane");
+		farPlaneUniformLocation = glGetUniformLocation(mainShader.program, "farPlane");
 		glUniform1f(farPlaneUniformLocation, far);
 
 		GLint ambientUniformLocation = glGetUniformLocation(mainShader.program, "pointLight.ambient");
