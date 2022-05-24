@@ -1,0 +1,295 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 49506,
+      "max": [
+        2.304570436477661,
+        22.049802780151367,
+        12.27982234954834
+      ],
+      "min": [
+        -0.9839547872543335,
+        -22.47870445251465,
+        -0.055265653878450394
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 594072,
+      "componentType": 5126,
+      "count": 49506,
+      "max": [
+        0.9999998807907104,
+        0.9999974966049194,
+        0.9999993443489075
+      ],
+      "min": [
+        -0.975054919719696,
+        -0.9999991655349731,
+        -0.9999933838844299
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 49506,
+      "max": [
+        0.9999911785125732,
+        0.9999989867210388,
+        0.9999997019767761,
+        1.0
+      ],
+      "min": [
+        -0.9999997615814209,
+        -0.9999995827674866,
+        -0.9999950528144836,
+        -1.0
+      ],
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 49506,
+      "max": [
+        0.9994534254074097,
+        0.9513812065124512
+      ],
+      "min": [
+        0.0004898650222457945,
+        0.0005097179673612118
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 277071,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "3dhdscan (https://sketchfab.com/3dhdscan)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/grafiti-jaselska1-ea0129787e9a4a88bfe56d4ecd016c50",
+      "title": "Grafiti Jaselska1"
+    },
+    "generator": "Sketchfab-12.67.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 1108284,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 396048,
+      "byteOffset": 1108284,
+      "byteStride": 8,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1188144,
+      "byteOffset": 1504332,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 792096,
+      "byteOffset": 2692476,
+      "byteStride": 16,
+      "name": "floatBufferViews",
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 3484572,
+      "uri": "scene.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/grafiti_jaselska1_baseColor.jpeg"
+    },
+    {
+      "uri": "textures/grafiti_jaselska1_metallicRoughness.png"
+    },
+    {
+      "uri": "textures/grafiti_jaselska1_normal.jpeg"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "grafiti_jaselska1",
+      "normalTexture": {
+        "index": 2
+      },
+      "occlusionTexture": {
+        "index": 1
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0,
+        "metallicRoughnessTexture": {
+          "index": 1
+        },
+        "roughnessFactor": 0.8810792884997279
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "grafiti_jaselska1_grafiti_jaselska1_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TANGENT": 2,
+            "TEXCOORD_0": 3
+          },
+          "indices": 4,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        -0.0028668129816651344,
+        -8.121019927131573e-19,
+        -1.8032286613082366e-34,
+        0.0,
+        0.0,
+        6.365603559077858e-19,
+        -0.0028668129816651344,
+        0.0,
+        8.121019927131573e-19,
+        -0.0028668129816651344,
+        -6.365603559077858e-19,
+        0.0,
+        -42.89189147949219,
+        -1222.4578857421875,
+        -2.714401782771131e-13,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "grafiti_jaselska1.FBX"
+    },
+    {
+      "children": [
+        3
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        4
+      ],
+      "matrix": [
+        -4.371138873082714e-06,
+        -99.9999999999999,
+        0.0,
+        0.0,
+        99.9999999999999,
+        -4.371138873082714e-06,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        100.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "grafiti_jaselska1"
+    },
+    {
+      "mesh": 0,
+      "name": "grafiti_jaselska1_grafiti_jaselska1_0"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 33071,
+      "wrapT": 33071
+    },
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 1,
+      "source": 1
+    },
+    {
+      "sampler": 1,
+      "source": 2
+    }
+  ]
+}

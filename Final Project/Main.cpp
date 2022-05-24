@@ -163,11 +163,10 @@ int main()
 		glViewport(0, 0, 1024, 1024);
 		shadowShader.use();
 		
-		for (int i = 0; i < 6; ++i)
+		for (int i = 0; i < 6; i++)
 		{
 			std::string shadowMatrixName = "shadowMatrices[" + std::to_string(i) + "]";
 			const char* bruh = shadowMatrixName.c_str();
-			std::cout << bruh << "\n";
 			GLint shadowMatrixUniformLocation = glGetUniformLocation(shadowShader.program, bruh);
 			glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(viewMatrixLight[i]));
 		}
@@ -186,7 +185,7 @@ int main()
 		Sun.Draw(shadowShader);
 		modelMatrix = glm::mat4(1.0f);
 
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(50*glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(50 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 3.0f));	
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(-113.4f), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(25 * glfwGetTime())), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -194,6 +193,15 @@ int main()
 		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 		
 		Earth.Draw(shadowShader);
+
+		modelMatrix = glm::mat4(1.0f);
+
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 5.0f));	
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.05f, 0.001f));
+		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+		
+		Sun.Draw(shadowShader);
+		
 
 		//SECOND PASS
 		glViewport(0, 0, windowWidth, windowHeight);
@@ -237,7 +245,7 @@ int main()
 
 		modelMatrix = glm::mat4(1.0f);
 
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(50*glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(50 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 3.0f));	
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(-113.4f), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(25 * glfwGetTime())), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -254,6 +262,19 @@ int main()
 
 		// Earth
 		Earth.Draw(mainShader);
+
+		modelMatrix = glm::mat4(1.0f);
+
+		modelMatrix = glm::mat4(1.0f);
+
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 5.0f));	
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.05f, 0.001f));
+		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+		mvpMatrix = perspectiveMatrix * viewMatrix * modelMatrix;
+		glUniformMatrix4fv(mvpMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
+		
+		Sun.Draw(mainShader);
 
 		// Lighting
 		GLint eyePosUniformLocation = glGetUniformLocation(mainShader.program, "eyePos");
