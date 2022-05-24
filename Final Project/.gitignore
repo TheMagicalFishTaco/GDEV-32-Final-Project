@@ -400,3 +400,5 @@ FodyWeavers.xsd
 # Misc Project Files (for VSCode)
 compile.bat
 glad.c
+out.exe
+libassimp-5.dll

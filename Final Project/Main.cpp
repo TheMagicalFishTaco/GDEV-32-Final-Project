@@ -163,11 +163,11 @@ int main()
 		glViewport(0, 0, 1024, 1024);
 		shadowShader.use();
 		
-		for (unsigned int i = 0; i < 6; ++i)
+		for (int i = 0; i < 6; ++i)
 		{
-			//simpleDepthShader.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
 			std::string shadowMatrixName = "shadowMatrices[" + std::to_string(i) + "]";
-			GLint shadowMatrixUniformLocation = glGetUniformLocation(shadowShader.program, shadowMatrixName.c_str());
+			const char* bruh = shadowMatrixName.c_str();
+			GLint shadowMatrixUniformLocation = glGetUniformLocation(shadowShader.program, bruh);
 			glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(viewMatrixLight[i]));
 		}
 
