@@ -42,7 +42,7 @@ vec3 gridSamplingDisk[20] = vec3[]
 
 float calculateShadow(vec3 normalVector, vec3 towardsLight)
 {
-	vec3 fragToLight = fragPos - lightPos;
+	vec3 fragToLight = FragPos - vec3(0.0f, 0.0f, 0.0f);
 
 	float depthValue = texture(shadowMap, fragToLight).r;
 	float depthLightSpace = length(fragToLight);
@@ -51,12 +51,12 @@ float calculateShadow(vec3 normalVector, vec3 towardsLight)
 	float newDepthValue = 0.0f;
 	float shadowValue = 0.0f;
 	vec2 shadowMapPixelSize = 1.0f / vec2(1024, 1024);
-	float viewDistance = length(viewPos - fragPos);
-    float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
-	for (int x = 0; x < gridSamplingDisk.size(); x++)
+	float viewDistance = length(eyePos - FragPos);
+    float diskRadius = (1.0 + (viewDistance / farPlane)) / 25.0f;
+	for (int x = 0; x < 20; x++)
 	{
 		newDepthValue = texture(shadowMap, fragToLight + gridSamplingDisk[x] * diskRadius).r;
-		newDepthValue *= far_plane; 
+		newDepthValue *= farPlane; 
 		if (newDepthValue < depthLightSpace - bias)
 		{
 			shadowValue += 0.0f;
