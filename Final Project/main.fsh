@@ -88,7 +88,7 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
 	vec3 pointSpecular = spec * pointLight.specular * texture(texture_specular1,outUV).rgb * texture(texture_diffuse1, outUV).rgb;
 	
-	vec3 PointComponent = (pointDiffuse + pointSpecular) * calculateShadow(norm, lightDir));
+	vec3 PointComponent = (pointDiffuse + pointSpecular) * calculateShadow(norm, lightDir);
 	
 	// Get pixel color of the texture at the current UV coordinate
 	// and output it as our final fragment color

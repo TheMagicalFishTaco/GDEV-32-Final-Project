@@ -167,16 +167,15 @@ int main()
 		{
 			std::string shadowMatrixName = "shadowMatrices[" + std::to_string(i) + "]";
 			const char* bruh = shadowMatrixName.c_str();
+			std::cout << bruh << "\n";
 			GLint shadowMatrixUniformLocation = glGetUniformLocation(shadowShader.program, bruh);
 			glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(viewMatrixLight[i]));
 		}
 
-		GLint farPlaneUniformLocation = glGetUniformLocation(mainShader.program, "farPlane");
+		GLint farPlaneUniformLocation = glGetUniformLocation(shadowShader.program, "farPlane");
 		glUniform1f(farPlaneUniformLocation, far);
-		GLint lightPosUniformLocation = glGetUniformLocation(mainShader.program, "lightPos");
+		GLint lightPosUniformLocation = glGetUniformLocation(shadowShader.program, "lightPos");
 		glUniform3f(lightPosUniformLocation, 0.0f, 0.0f, 0.0f);
-		GLint eyePosUniformLocation = glGetUniformLocation(mainShader.program, "eyePos");
-		glUniform3f(eyePosUniformLocation, 0.0f, 1.0f, 5.5f);
 		GLint modelMatrixUniformLocation = glGetUniformLocation(shadowShader.program, "modelMatrix");
 
 		glm::mat4 modelMatrix = glm::mat4(1.0f);
@@ -200,6 +199,8 @@ int main()
 		glViewport(0, 0, windowWidth, windowHeight);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, fboTex);
 
 		//---View Matrix---
 		glm::mat4 viewMatrix;
@@ -254,16 +255,8 @@ int main()
 		// Earth
 		Earth.Draw(mainShader);
 
-		// Uniform that passes lightColor needed for ambient lighting
-		GLint lightColorUniformLocation = glGetUniformLocation(mainShader.program, "lightColor");
-		glUniform3f(lightColorUniformLocation, 1.0f, 1.0f, 1.0f);
-
-		// Uniform that passes lightPos needed for diffuse lighting
-		lightPosUniformLocation = glGetUniformLocation(mainShader.program, "lightPos");
-		glUniform3f(lightPosUniformLocation, 0.0f, 0.0f, 0.0f);
-
-		// Uniform that passes eyePosition needed for specular lighting
-		eyePosUniformLocation = glGetUniformLocation(mainShader.program, "eyePos");
+		// Lighting
+		GLint eyePosUniformLocation = glGetUniformLocation(mainShader.program, "eyePos");
 		glUniform3f(eyePosUniformLocation, 0.0f, 1.0f, 5.5f);
 		farPlaneUniformLocation = glGetUniformLocation(mainShader.program, "farPlane");
 		glUniform1f(farPlaneUniformLocation, far);

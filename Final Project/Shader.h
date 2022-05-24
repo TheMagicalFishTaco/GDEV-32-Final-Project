@@ -49,7 +49,7 @@ public:
 	{
 		GLuint vertexShader = CreateShaderFromFile(GL_VERTEX_SHADER, vertexShaderFilePath);
 		GLuint fragmentShader = CreateShaderFromFile(GL_FRAGMENT_SHADER, fragmentShaderFilePath);
-		GLuint geometryShader = CreateShaderFromFile(GL_FRAGMENT_SHADER, geometryShaderFilePath);
+		GLuint geometryShader = CreateShaderFromFile(GL_GEOMETRY_SHADER, geometryShaderFilePath);
 
 		program = glCreateProgram();
 		glAttachShader(program, vertexShader);
