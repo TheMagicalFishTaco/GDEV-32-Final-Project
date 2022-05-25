@@ -27,9 +27,12 @@ struct PointLight
 uniform sampler2D texture_diffuse1, texture_specular1;
 uniform PointLight pointLight;
 uniform vec3 eyePos;
+
+// cube map
 uniform samplerCube shadowMap;
 uniform float farPlane;
 
+// lists pixels of the cube map to be sampled
 vec3 gridSamplingDisk[20] = vec3[]
 (
    vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
@@ -50,9 +53,10 @@ float calculateShadow()
 
     float newDepthValue = 0.0f;
     float shadowValue = 0.0f;
-    vec2 shadowMapPixelSize = 1.0f / vec2(1024, 1024);
     float viewDistance = length(eyePos - FragPos);
     float diskRadius = (1.0f + (viewDistance / farPlane)) / 25.0f;
+
+    // PCF but for cube maps
     for (int x = 0; x < 20; x++)
     {
         newDepthValue = texture(shadowMap, fragToLight + gridSamplingDisk[x] * diskRadius).r;

@@ -119,7 +119,9 @@ int main()
 	Model Earth("Models/Earth/scene.gltf");
 	Model Sun("Models/Sun/scene.gltf");
 	Model Moon("Models/Moon/scene.gltf");
-	Model Wall("Models/Wall/scene.gltf");
+	
+	// WALL FOR SHADOW DEBUG
+	// Model Wall("Models/Wall/scene.gltf");
 
 	// Tell OpenGL the dimensions of the region where stuff will be drawn.
 	// For now, tell OpenGL to use the whole screen
@@ -138,14 +140,11 @@ int main()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, fboTex);
 
 	GLuint shadowWidth = 1024, shadowHeight = 1024;
+	// makes empty texture for each face of the cube map
 	for (unsigned int i = 0; i < 6; ++i)
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT,
 			shadowWidth, shadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
-	// glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	// glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	// glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -182,6 +181,7 @@ int main()
 		float far = 50.0f;
 		glm::vec3 lightPos = glm::vec3(0.0f);
 
+		// makes projection matrices for each face of the cube map
 		glm::mat4 projectionMatrixLight = glm::perspective(glm::radians(90.0f), aspect, near, far);
 		std::vector<glm::mat4> viewMatrixLight;
 		viewMatrixLight.push_back(projectionMatrixLight *
@@ -203,11 +203,13 @@ int main()
 		glViewport(0, 0, shadowWidth, shadowHeight);
 		shadowShader.use();
 		
+
+		// Passing shadow uniforms
 		for (int i = 0; i < 6; ++i)
 		{
 			std::string shadowMatrixName = "shadowMatrices[" + std::to_string(i) + "]";
-			const char* bruh = shadowMatrixName.c_str();
-			GLint shadowMatrixUniformLocation = glGetUniformLocation(shadowShader.program, bruh);
+			const char* convertedShadowMatrixName = shadowMatrixName.c_str();
+			GLint shadowMatrixUniformLocation = glGetUniformLocation(shadowShader.program, convertedShadowMatrixName);
 			glUniformMatrix4fv(shadowMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(viewMatrixLight[i]));
 		}
 
@@ -216,14 +218,10 @@ int main()
 		GLint lightPosUniformLocation = glGetUniformLocation(shadowShader.program, "lightPos");
 		glUniform3f(lightPosUniformLocation, 0.0f, 0.0f, 0.0f);
 		GLint modelMatrixUniformLocation = glGetUniformLocation(shadowShader.program, "modelMatrix");
+		
+		// Avoid drawing Sun because it's not supposed to cast a shadow
 
 		glm::mat4 modelMatrix = glm::mat4(1.0f);
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.15f, 0.15f, 0.15f));
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-
-		// Sun.Draw(shadowShader);
-		modelMatrix = glm::mat4(1.0f);
 
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(5 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 5.0f));	
@@ -265,9 +263,6 @@ int main()
 		//---View Matrix---
 		glm::mat4 viewMatrix;
 
-		// viewMatrix = glm::lookAt(glm::vec3(0.0f, 1.0f, 5.5f),
-		// 						glm::vec3(0.0f, 0.0f, 0.0f),
-		// 						glm::vec3(0.0f, 1.0f, 0.0f));
 		viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
 		//---Perspective Matrix---
@@ -344,9 +339,8 @@ int main()
 
 		// Wall.Draw(mainShader);
 
-		// Lighting
+		// Lighting uniforms
 		GLint eyePosUniformLocation = glGetUniformLocation(mainShader.program, "eyePos");
-		// glUniform3f(eyePosUniformLocation, 0.0f, 1.0f, 5.5f);
 		glUniform3f(eyePosUniformLocation, cameraPos.x,  cameraPos.y,  cameraPos.z);
 		farPlaneUniformLocation = glGetUniformLocation(mainShader.program, "farPlane");
 		glUniform1f(farPlaneUniformLocation, far);
