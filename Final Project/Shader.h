@@ -17,7 +17,35 @@ public:
 	/// </summary>
 	/// <param name="vertexShaderFilePath">Vertex shader file path</param>
 	/// <param name="fragmentShaderFilePath">Fragment shader file path</param>
-	Shader(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath, const std::string& geometryShaderFilePath = nullptr)
+	Shader(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath)
+	{
+		GLuint vertexShader = CreateShaderFromFile(GL_VERTEX_SHADER, vertexShaderFilePath);
+		GLuint fragmentShader = CreateShaderFromFile(GL_FRAGMENT_SHADER, fragmentShaderFilePath);
+
+		program = glCreateProgram();
+		glAttachShader(program, vertexShader);
+		glAttachShader(program, fragmentShader);
+
+		glLinkProgram(program);
+
+		glDetachShader(program, vertexShader);
+		glDeleteShader(vertexShader);
+		glDetachShader(program, fragmentShader);
+		glDeleteShader(fragmentShader);
+
+		// Check shader program link status
+		GLint linkStatus;
+		glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+		if (linkStatus != GL_TRUE) 
+		{
+			char infoLog[512];
+			GLsizei infoLogLen = sizeof(infoLog);
+			glGetProgramInfoLog(program, infoLogLen, &infoLogLen, infoLog);
+			std::cerr << "program link error: " << infoLog << std::endl;
+		}
+	}
+
+	Shader(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath, const std::string& geometryShaderFilePath)
 	{
 		GLuint vertexShader = CreateShaderFromFile(GL_VERTEX_SHADER, vertexShaderFilePath);
 		GLuint fragmentShader = CreateShaderFromFile(GL_FRAGMENT_SHADER, fragmentShaderFilePath);
