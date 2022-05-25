@@ -118,6 +118,7 @@ int main()
 	// Get the model(s)
 	Model Earth("Models/Earth/scene.gltf");
 	Model Sun("Models/Sun/scene.gltf");
+	Model Moon("Models/Moon/scene.gltf");
 	Model Wall("Models/Wall/scene.gltf");
 
 	// Tell OpenGL the dimensions of the region where stuff will be drawn.
@@ -224,8 +225,8 @@ int main()
 		// Sun.Draw(shadowShader);
 		modelMatrix = glm::mat4(1.0f);
 
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(50 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 3.0f));	
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(5 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 5.0f));	
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(-113.4f), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(25 * glfwGetTime())), glm::vec3(0.0f, 0.0f, 1.0f));
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
@@ -234,13 +235,25 @@ int main()
 		Earth.Draw(shadowShader);
 
 		modelMatrix = glm::mat4(1.0f);
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(-10.0f, 0.0f, 0.0f));
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -5.0f));
+
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(5 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 5.0f));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(25 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.75f));
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.15f, 0.15f, 0.15f));
 		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+		Moon.Draw(shadowShader);
+
+		// DEBUG WALL FOR SHADOWS
+		// modelMatrix = glm::mat4(1.0f);
+		// modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		// modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		// modelMatrix = glm::translate(modelMatrix, glm::vec3(-10.0f, 0.0f, 0.0f));
+		// modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -5.0f));
+		// glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 		
-		Wall.Draw(shadowShader);
+		// Wall.Draw(shadowShader);
 		
 
 		//SECOND PASS
@@ -285,8 +298,8 @@ int main()
 
 		modelMatrix = glm::mat4(1.0f);
 
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(50 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 3.0f));	
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(5 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 5.0f));	
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(-113.4f), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(25 * glfwGetTime())), glm::vec3(0.0f, 0.0f, 1.0f));
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
@@ -303,17 +316,33 @@ int main()
 		// Earth
 		Earth.Draw(mainShader);
 
+		//---Transformation Matrix for the Model (Moon)---
 		modelMatrix = glm::mat4(1.0f);
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(-10.0f, 0.0f, 0.0f));
-		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -5.0f));
+
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(5 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 5.0f));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(25 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 0.75f));
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.15f, 0.15f, 0.15f));
 		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-		
+
 		mvpMatrix = perspectiveMatrix * viewMatrix * modelMatrix;
 		glUniformMatrix4fv(mvpMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
 
-		Wall.Draw(mainShader);
+		Moon.Draw(mainShader);
+
+		// DEBUG WALL FOR SHADOWS
+		// modelMatrix = glm::mat4(1.0f);
+		// modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		// modelMatrix = glm::rotate(modelMatrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		// modelMatrix = glm::translate(modelMatrix, glm::vec3(-10.0f, 0.0f, 0.0f));
+		// modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -5.0f));
+		// glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+		
+		// mvpMatrix = perspectiveMatrix * viewMatrix * modelMatrix;
+		// glUniformMatrix4fv(mvpMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(mvpMatrix));
+
+		// Wall.Draw(mainShader);
 
 		// Lighting
 		GLint eyePosUniformLocation = glGetUniformLocation(mainShader.program, "eyePos");
