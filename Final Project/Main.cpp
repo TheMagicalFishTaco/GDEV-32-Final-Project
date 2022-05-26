@@ -44,6 +44,7 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 float deltaTime = 0.0f;
 float lastframe = 0.0f;
+bool followCameraIsEnabled = false;
 
 // mouse input variables
 bool firstMouse = true;
@@ -302,6 +303,7 @@ int main()
 		modelMatrixUniformLocation = glGetUniformLocation(mainShader.program, "modelMatrix");
 		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
+		glm:: mat4 earthModelMatrix = modelMatrix;
 		glm::mat4 mvpMatrix;
 		mvpMatrix = perspectiveMatrix * viewMatrix * modelMatrix;
 
@@ -433,30 +435,36 @@ void scroll_zoom(GLFWwindow* window, double xOffset, double yOffset)
 
 }
 // Keyboard input
-void processInput(GLFWwindow *window)
+void processInput(GLFWwindow* window)
 {
 	float cameraSpeed = 2.5f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) 
 	{
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	if ((glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) && followCameraIsEnabled == false)
 	{
 		cameraPos += cameraSpeed * cameraFront;
 	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	if ((glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) && followCameraIsEnabled == false)
 	{
 		cameraPos -= cameraSpeed * cameraFront;
 	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	if ((glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) && followCameraIsEnabled == false)
 	{
 		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	if ((glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) && followCameraIsEnabled == false)
 	{
 		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	}
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+	{
+		followCameraIsEnabled = !followCameraIsEnabled;
+	}
 }
+
 
 /// <summary>
 /// Function for handling the event when the size of the framebuffer changed.
