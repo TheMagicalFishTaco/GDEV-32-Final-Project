@@ -46,6 +46,7 @@ glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 float deltaTime = 0.0f;
 float lastframe = 0.0f;
 bool followCameraIsEnabled = false;
+glm::mat4 earthModelMatrix = glm::mat4(1.0f);
 
 // mouse input variables
 bool firstMouse = true;
@@ -226,13 +227,20 @@ int main()
 
 		glm::mat4 modelMatrix = glm::mat4(1.0f);
 
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(5 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(5 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));		
 		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 5.0f));	
+		earthModelMatrix = modelMatrix;
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(-113.4f), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(25 * glfwGetTime())), glm::vec3(0.0f, 0.0f, 1.0f));
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
 		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 		
+
+		if (followCameraIsEnabled)
+		{
+			cameraPos = glm::vec3(-2.0f, 0.0f, 0.0f);
+			cameraPos = glm::vec3(earthModelMatrix * glm::vec4(cameraPos, 1.0f));
+		}
 		Earth.Draw(shadowShader);
 
 		modelMatrix = glm::mat4(1.0f);
@@ -461,7 +469,6 @@ void processInput(GLFWwindow* window)
 	{
 		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	}
-
 }
 //keyboard input for toggling follow cam
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -470,7 +477,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	{
 		followCameraIsEnabled = !followCameraIsEnabled;
 	}
-	std::cout << followCameraIsEnabled << "\n";
 }
 
 
