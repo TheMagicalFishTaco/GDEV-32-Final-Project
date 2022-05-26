@@ -37,6 +37,7 @@ void FramebufferSizeChangedCallback(GLFWwindow* window, int width, int height);
 void mouse_input(GLFWwindow *window, double xPos, double yPos);
 void scroll_zoom(GLFWwindow* window, double xOffset, double yOffset);
 void processInput(GLFWwindow *window);
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 // camera variables
 glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 5.0f);
@@ -44,6 +45,8 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 float deltaTime = 0.0f;
 float lastframe = 0.0f;
+bool followCameraIsEnabled = false;
+glm::mat4 earthModelMatrix = glm::mat4(1.0f);
 
 // mouse input variables
 bool firstMouse = true;
@@ -87,7 +90,8 @@ int main()
 		glfwTerminate();
 		return 1;
 	}
-
+	//for spacebar input
+	glfwSetKeyCallback(window, keyCallback);
 	// hide the cursor
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -223,13 +227,20 @@ int main()
 
 		glm::mat4 modelMatrix = glm::mat4(1.0f);
 
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(5 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(5 * glfwGetTime())), glm::vec3(0.0f, 1.0f, 0.0f));		
 		modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, 5.0f));	
+		earthModelMatrix = modelMatrix;
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(-113.4f), glm::vec3(1.0f, 0.0f, 0.0f));
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(float(25 * glfwGetTime())), glm::vec3(0.0f, 0.0f, 1.0f));
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
 		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 		
+
+		if (followCameraIsEnabled)
+		{
+			cameraPos = glm::vec3(-2.0f, 0.0f, 0.0f);
+			cameraPos = glm::vec3(earthModelMatrix * glm::vec4(cameraPos, 1.0f));
+		}
 		Earth.Draw(shadowShader);
 
 		modelMatrix = glm::mat4(1.0f);
@@ -302,6 +313,7 @@ int main()
 		modelMatrixUniformLocation = glGetUniformLocation(mainShader.program, "modelMatrix");
 		glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
+		glm:: mat4 earthModelMatrix = modelMatrix;
 		glm::mat4 mvpMatrix;
 		mvpMatrix = perspectiveMatrix * viewMatrix * modelMatrix;
 
@@ -432,31 +444,42 @@ void scroll_zoom(GLFWwindow* window, double xOffset, double yOffset)
 	}
 
 }
-// Keyboard input
-void processInput(GLFWwindow *window)
+// Keyboard input for movement
+void processInput(GLFWwindow* window)
 {
 	float cameraSpeed = 2.5f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) 
 	{
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	if ((glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) && followCameraIsEnabled == false)
 	{
 		cameraPos += cameraSpeed * cameraFront;
 	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	if ((glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) && followCameraIsEnabled == false)
 	{
 		cameraPos -= cameraSpeed * cameraFront;
 	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	if ((glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) && followCameraIsEnabled == false)
 	{
 		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	if ((glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) && followCameraIsEnabled == false)
 	{
 		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	}
 }
+//keyboard input for toggling follow cam
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+	{
+		followCameraIsEnabled = !followCameraIsEnabled;
+	}
+}
+
+
 
 /// <summary>
 /// Function for handling the event when the size of the framebuffer changed.
