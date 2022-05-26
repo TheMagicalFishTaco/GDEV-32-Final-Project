@@ -37,6 +37,7 @@ void FramebufferSizeChangedCallback(GLFWwindow* window, int width, int height);
 void mouse_input(GLFWwindow *window, double xPos, double yPos);
 void scroll_zoom(GLFWwindow* window, double xOffset, double yOffset);
 void processInput(GLFWwindow *window);
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 // camera variables
 glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 5.0f);
@@ -88,7 +89,8 @@ int main()
 		glfwTerminate();
 		return 1;
 	}
-
+	//for spacebar input
+	glfwSetKeyCallback(window, keyCallback);
 	// hide the cursor
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -434,7 +436,7 @@ void scroll_zoom(GLFWwindow* window, double xOffset, double yOffset)
 	}
 
 }
-// Keyboard input
+// Keyboard input for movement
 void processInput(GLFWwindow* window)
 {
 	float cameraSpeed = 2.5f * deltaTime;
@@ -459,11 +461,18 @@ void processInput(GLFWwindow* window)
 	{
 		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	}
+
+}
+//keyboard input for toggling follow cam
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 	{
 		followCameraIsEnabled = !followCameraIsEnabled;
 	}
+	std::cout << followCameraIsEnabled << "\n";
 }
+
 
 
 /// <summary>
